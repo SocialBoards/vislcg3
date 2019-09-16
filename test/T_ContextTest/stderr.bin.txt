@@ -1,0 +1,7 @@
+Initialization took 0.000165 seconds.
+Reindexing grammar...
+Parsing grammar took 0.000282 seconds.
+Grammar has 1 sections, 0 templates, 8 rules, 11 sets, 20 tags.
+6 rules cannot be skipped by index.
+Writing binary grammar took 0.000161 seconds.
+Cleanup took 8e-06 seconds.

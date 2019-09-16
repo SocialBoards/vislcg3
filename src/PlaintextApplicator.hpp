@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2007-2017, GrammarSoft ApS
+* Copyright (C) 2007-2018, GrammarSoft ApS
 * Developed by Tino Didriksen <mail@tinodidriksen.com>
 * Design by Eckhard Bick <eckhard.bick@mail.dk>, Tino Didriksen <mail@tinodidriksen.com>
 *
@@ -29,11 +29,13 @@ namespace CG3 {
 
 class PlaintextApplicator : public virtual GrammarApplicator {
 public:
-	PlaintextApplicator(UFILE *ux_err);
-	void runGrammarOnText(istream& input, UFILE *output);
+	bool add_tags = false;
 
-	void printCohort(Cohort *cohort, UFILE *output);
-	void printSingleWindow(SingleWindow *window, UFILE *output);
+	PlaintextApplicator(std::ostream& ux_err);
+	void runGrammarOnText(std::istream& input, std::ostream& output);
+
+	void printCohort(Cohort* cohort, std::ostream& output);
+	void printSingleWindow(SingleWindow* window, std::ostream& output);
 };
 }
 

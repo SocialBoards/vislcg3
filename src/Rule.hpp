@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2007-2017, GrammarSoft ApS
+* Copyright (C) 2007-2018, GrammarSoft ApS
 * Developed by Tino Didriksen <mail@tinodidriksen.com>
 * Design by Eckhard Bick <eckhard.bick@mail.dk>, Tino Didriksen <mail@tinodidriksen.com>
 *
@@ -63,14 +63,16 @@ enum {
 	RF_OUTPUT       = (1 << 24),
 	RF_CAPTURE_UNIF = (1 << 25),
 	RF_REPEAT       = (1 << 26),
+	RF_BEFORE       = (1 << 27),
+	RF_AFTER        = (1 << 28),
 
 	MASK_ENCL       = RF_ENCL_INNER | RF_ENCL_OUTER | RF_ENCL_FINAL | RF_ENCL_ANY,
 };
 
 class Rule {
 public:
-	UChar *name;
-	Tag *wordform;
+	UString name;
+	Tag* wordform;
 	uint32_t target;
 	uint32_t childset1, childset2;
 	uint32_t line, number;
@@ -78,33 +80,31 @@ public:
 	uint32_t flags;
 	int32_t section;
 	int32_t sub_reading;
-	// ToDo: Add proper "quality" quantifier based on num_fail, num_match, total_time
-	double weight, quality;
 	KEYWORDS type;
-	Set *maplist;
-	Set *sublist;
+	Set* maplist;
+	Set* sublist;
 
 	mutable ContextList tests;
 	mutable ContextList dep_tests;
 	mutable uint32_t num_fail, num_match;
 	mutable double total_time;
-	mutable ContextualTest *dep_target;
+	mutable ContextualTest* dep_target;
 
 	Rule();
 	~Rule();
-	void setName(const UChar *to);
+	void setName(const UChar* to);
 
 	void resetStatistics();
 
-	void addContextualTest(ContextualTest *to, ContextList& head);
+	void addContextualTest(ContextualTest* to, ContextList& head);
 	void reverseContextualTests();
 
-	static bool cmp_quality(const Rule *a, const Rule *b);
+	static bool cmp_quality(const Rule* a, const Rule* b);
 };
 
 typedef std::vector<Rule*> RuleVector;
 typedef std::map<uint32_t, Rule*> RuleByLineMap;
-typedef stdext::hash_map<uint32_t, Rule*> RuleByLineHashMap;
+typedef std::unordered_map<uint32_t, Rule*> RuleByLineHashMap;
 }
 
 #endif

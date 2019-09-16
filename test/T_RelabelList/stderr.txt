@@ -1,0 +1,2 @@
+Sections: 0, Rules: 14, Sets: 27, Tags: 36
+4 rules cannot be skipped by index.

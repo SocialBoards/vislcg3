@@ -1,0 +1,106 @@
+Performing C SOURCE FILE Test COMPILER_SUPPORTS_-std-c2x failed with the following output:
+Change Dir: /home/emil/Programmer/vislcg3/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_ffad6/fast"
+/usr/bin/make -f CMakeFiles/cmTC_ffad6.dir/build.make CMakeFiles/cmTC_ffad6.dir/build
+make[1]: Entering directory '/home/emil/Programmer/vislcg3/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_ffad6.dir/src.c.o
+/usr/bin/cc   -Wall -Wextra -Wno-missing-field-initializers -Wno-deprecated -Wno-unused-parameter -fPIC -Wno-unused-result -flto -DCOMPILER_SUPPORTS_-std-c2x -fPIE   -std=c2x -o CMakeFiles/cmTC_ffad6.dir/src.c.o   -c /home/emil/Programmer/vislcg3/CMakeFiles/CMakeTmp/src.c
+cc: error: unrecognized command line option '-std=c2x'; did you mean '-std=c1x'?
+CMakeFiles/cmTC_ffad6.dir/build.make:65: recipe for target 'CMakeFiles/cmTC_ffad6.dir/src.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_ffad6.dir/src.c.o] Error 1
+make[1]: Leaving directory '/home/emil/Programmer/vislcg3/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_ffad6/fast' failed
+make: *** [cmTC_ffad6/fast] Error 2
+
+Source file was:
+int main(void) { return 0; }
+Performing C++ SOURCE FILE Test COMPILER_SUPPORTS_-std-c--20 failed with the following output:
+Change Dir: /home/emil/Programmer/vislcg3/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_d1209/fast"
+/usr/bin/make -f CMakeFiles/cmTC_d1209.dir/build.make CMakeFiles/cmTC_d1209.dir/build
+make[1]: Entering directory '/home/emil/Programmer/vislcg3/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_d1209.dir/src.cxx.o
+/usr/bin/c++    -Wall -Wextra -Wno-missing-field-initializers -Wno-deprecated -Wno-unused-parameter -fPIC -Wno-unused-result -flto -fvisibility-inlines-hidden -DCOMPILER_SUPPORTS_-std-c--20 -fPIE   -std=c++20 -o CMakeFiles/cmTC_d1209.dir/src.cxx.o -c /home/emil/Programmer/vislcg3/CMakeFiles/CMakeTmp/src.cxx
+c++: error: unrecognized command line option '-std=c++20'; did you mean '-std=c++03'?
+CMakeFiles/cmTC_d1209.dir/build.make:65: recipe for target 'CMakeFiles/cmTC_d1209.dir/src.cxx.o' failed
+make[1]: *** [CMakeFiles/cmTC_d1209.dir/src.cxx.o] Error 1
+make[1]: Leaving directory '/home/emil/Programmer/vislcg3/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_d1209/fast' failed
+make: *** [cmTC_d1209/fast] Error 2
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test COMPILER_SUPPORTS_-std-c--2a failed with the following output:
+Change Dir: /home/emil/Programmer/vislcg3/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_6998a/fast"
+/usr/bin/make -f CMakeFiles/cmTC_6998a.dir/build.make CMakeFiles/cmTC_6998a.dir/build
+make[1]: Entering directory '/home/emil/Programmer/vislcg3/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_6998a.dir/src.cxx.o
+/usr/bin/c++    -Wall -Wextra -Wno-missing-field-initializers -Wno-deprecated -Wno-unused-parameter -fPIC -Wno-unused-result -flto -fvisibility-inlines-hidden -DCOMPILER_SUPPORTS_-std-c--2a -fPIE   -std=c++2a -o CMakeFiles/cmTC_6998a.dir/src.cxx.o -c /home/emil/Programmer/vislcg3/CMakeFiles/CMakeTmp/src.cxx
+c++: error: unrecognized command line option '-std=c++2a'; did you mean '-std=c++03'?
+CMakeFiles/cmTC_6998a.dir/build.make:65: recipe for target 'CMakeFiles/cmTC_6998a.dir/src.cxx.o' failed
+make[1]: *** [CMakeFiles/cmTC_6998a.dir/src.cxx.o] Error 1
+make[1]: Leaving directory '/home/emil/Programmer/vislcg3/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_6998a/fast' failed
+make: *** [cmTC_6998a/fast] Error 2
+
+Source file was:
+int main() { return 0; }
+Determining if the pthread_create exist failed with the following output:
+Change Dir: /home/emil/Programmer/vislcg3/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_8e3e3/fast"
+/usr/bin/make -f CMakeFiles/cmTC_8e3e3.dir/build.make CMakeFiles/cmTC_8e3e3.dir/build
+make[1]: Entering directory '/home/emil/Programmer/vislcg3/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_8e3e3.dir/CheckSymbolExists.c.o
+/usr/bin/cc   -Wall -Wextra -Wno-missing-field-initializers -Wno-deprecated -Wno-unused-parameter -fPIC -Wno-unused-result -flto -std=c11  -fPIE   -o CMakeFiles/cmTC_8e3e3.dir/CheckSymbolExists.c.o   -c /home/emil/Programmer/vislcg3/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+Linking C executable cmTC_8e3e3
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_8e3e3.dir/link.txt --verbose=1
+/usr/bin/cc  -Wall -Wextra -Wno-missing-field-initializers -Wno-deprecated -Wno-unused-parameter -fPIC -Wno-unused-result -flto -std=c11     -rdynamic CMakeFiles/cmTC_8e3e3.dir/CheckSymbolExists.c.o  -o cmTC_8e3e3 
+/tmp/ccM0TDXI.ltrans0.ltrans.o: In function `main':
+<artificial>:(.text+0x1b): undefined reference to `pthread_create'
+collect2: error: ld returned 1 exit status
+CMakeFiles/cmTC_8e3e3.dir/build.make:97: recipe for target 'cmTC_8e3e3' failed
+make[1]: *** [cmTC_8e3e3] Error 1
+make[1]: Leaving directory '/home/emil/Programmer/vislcg3/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_8e3e3/fast' failed
+make: *** [cmTC_8e3e3/fast] Error 2
+
+File /home/emil/Programmer/vislcg3/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <pthread.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef pthread_create
+  return ((int*)(&pthread_create))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/emil/Programmer/vislcg3/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_21995/fast"
+/usr/bin/make -f CMakeFiles/cmTC_21995.dir/build.make CMakeFiles/cmTC_21995.dir/build
+make[1]: Entering directory '/home/emil/Programmer/vislcg3/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_21995.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -Wall -Wextra -Wno-missing-field-initializers -Wno-deprecated -Wno-unused-parameter -fPIC -Wno-unused-result -flto -std=c11 -DCHECK_FUNCTION_EXISTS=pthread_create -fPIE   -o CMakeFiles/cmTC_21995.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.10/Modules/CheckFunctionExists.c
+Linking C executable cmTC_21995
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_21995.dir/link.txt --verbose=1
+/usr/bin/cc  -Wall -Wextra -Wno-missing-field-initializers -Wno-deprecated -Wno-unused-parameter -fPIC -Wno-unused-result -flto -std=c11 -DCHECK_FUNCTION_EXISTS=pthread_create    -rdynamic CMakeFiles/cmTC_21995.dir/CheckFunctionExists.c.o  -o cmTC_21995 -lpthreads 
+/usr/bin/ld: cannot find -lpthreads
+collect2: error: ld returned 1 exit status
+CMakeFiles/cmTC_21995.dir/build.make:97: recipe for target 'cmTC_21995' failed
+make[1]: *** [cmTC_21995] Error 1
+make[1]: Leaving directory '/home/emil/Programmer/vislcg3/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_21995/fast' failed
+make: *** [cmTC_21995/fast] Error 2
+
+

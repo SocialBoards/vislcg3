@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2007-2017, GrammarSoft ApS
+* Copyright (C) 2007-2018, GrammarSoft ApS
 * Developed by Tino Didriksen <mail@tinodidriksen.com>
 * Design by Eckhard Bick <eckhard.bick@mail.dk>, Tino Didriksen <mail@tinodidriksen.com>
 *
@@ -27,8 +27,7 @@
 namespace CG3 {
 
 Rule::Rule()
-  : name(0)
-  , wordform(0)
+  : wordform(0)
   , target(0)
   , childset1(0)
   , childset2(0)
@@ -39,8 +38,6 @@ Rule::Rule()
   , flags(0)
   , section(0)
   , sub_reading(0)
-  , weight(0.0)
-  , quality(0.0)
   , type(K_IGNORE)
   , maplist(0)
   , sublist(0)
@@ -53,19 +50,16 @@ Rule::Rule()
 }
 
 Rule::~Rule() {
-	delete[] name;
 }
 
-void Rule::setName(const UChar *to) {
-	delete[] name;
-	name = 0;
+void Rule::setName(const UChar* to) {
+	name.clear();
 	if (to) {
-		name = new UChar[u_strlen(to) + 1];
-		u_strcpy(name, to);
+		name = to;
 	}
 }
 
-void Rule::addContextualTest(ContextualTest *to, ContextList& head) {
+void Rule::addContextualTest(ContextualTest* to, ContextList& head) {
 	head.push_front(to);
 }
 
@@ -75,18 +69,18 @@ void Rule::reverseContextualTests() {
 }
 
 void Rule::resetStatistics() {
-	foreach (it, tests) {
-		(*it)->resetStatistics();
+	for (auto it : tests) {
+		it->resetStatistics();
 	}
-	foreach (it, dep_tests) {
-		(*it)->resetStatistics();
+	for (auto it : dep_tests) {
+		it->resetStatistics();
 	}
 	num_fail = 0;
 	num_match = 0;
 	total_time = 0;
 }
 
-bool Rule::cmp_quality(const Rule *a, const Rule *b) {
+bool Rule::cmp_quality(const Rule* a, const Rule* b) {
 	return a->total_time > b->total_time;
 }
 }

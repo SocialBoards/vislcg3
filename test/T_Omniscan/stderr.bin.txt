@@ -1,0 +1,9 @@
+Initialization took 0.000136 seconds.
+Reindexing grammar...
+Parsing grammar took 0.00024 seconds.
+Grammar has 0 sections, 0 templates, 14 rules, 21 sets, 30 tags.
+Grammar has dependency rules.
+Grammar has relation rules.
+Writing binary grammar took 0.000196 seconds.
+Cleanup took 9e-06 seconds.
+Info: Dependency between 13 and 2 spans the window boundaries. Enumeration will be global from here on.

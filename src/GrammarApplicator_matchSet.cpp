@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2007-2017, GrammarSoft ApS
+* Copyright (C) 2007-2018, GrammarSoft ApS
 * Developed by Tino Didriksen <mail@tinodidriksen.com>
 * Design by Eckhard Bick <eckhard.bick@mail.dk>, Tino Didriksen <mail@tinodidriksen.com>
 *
@@ -33,7 +33,7 @@ namespace CG3 {
 /**
  * Tests whether one set is a subset of another set, specialized for TagSet.
  *
- * In the http://beta.visl.sdu.dk/cg3_performance.html test data, this function is executed 1516098 times,
+ * In the https://visl.sdu.dk/cg3_performance.html test data, this function is executed 1516098 times,
  * of which 23222 (1.5%) return true.
  *
  * @param[in] a The tags from the set
@@ -47,7 +47,7 @@ inline bool TagSet_SubsetOf_TSet(const TagSortedVector& a, const T& b) {
 	}
 	//*/
 	typename T::const_iterator bi = b.lower_bound((*a.begin())->hash);
-	boost_foreach (Tag *ai, a) {
+	for (auto ai : a) {
 		while (bi != b.end() && *bi < ai->hash) {
 			++bi;
 		}
@@ -76,7 +76,7 @@ uint32_t GrammarApplicator::doesTagMatchRegexp(uint32_t test, const Tag& tag, bo
 	else {
 		const Tag& itag = *(single_tags.find(test)->second);
 		UErrorCode status = U_ZERO_ERROR;
-		uregex_setText(tag.regexp, itag.tag.c_str(), itag.tag.length(), &status);
+		uregex_setText(tag.regexp, itag.tag.c_str(), static_cast<int32_t>(itag.tag.size()), &status);
 		if (status != U_ZERO_ERROR) {
 			u_fprintf(ux_stderr, "Error: uregex_setText(MatchSet) returned %s for tag %S before input line %u - cannot continue!\n", u_errorName(status), tag.tag.c_str(), numLines);
 			CG3Quit(1);
@@ -91,7 +91,6 @@ uint32_t GrammarApplicator::doesTagMatchRegexp(uint32_t test, const Tag& tag, bo
 		}
 		if (match) {
 			int32_t gc = uregex_groupCount(tag.regexp, &status);
-			// ToDo: Allow regex captures from dependency target contexts without any captures in normal target contexts
 			if (gc > 0 && regexgrps.second != 0) {
 				UChar tmp[1024];
 				for (int i = 1; i <= gc; ++i) {
@@ -126,19 +125,65 @@ uint32_t GrammarApplicator::doesTagMatchIcase(uint32_t test, const Tag& tag, boo
 	}
 	else {
 		const Tag& itag = *(single_tags.find(test)->second);
-		UErrorCode status = U_ZERO_ERROR;
-		if (u_strCaseCompare(tag.tag.c_str(), tag.tag.length(), itag.tag.c_str(), itag.tag.length(), U_FOLD_CASE_DEFAULT, &status) == 0) {
+		if (ux_strCaseCompare(tag.tag, itag.tag)) {
 			match = itag.hash;
-		}
-		if (status != U_ZERO_ERROR) {
-			u_fprintf(ux_stderr, "Error: u_strCaseCompare() returned %s - cannot continue!\n", u_errorName(status));
-			CG3Quit(1);
 		}
 		if (match) {
 			index_icase_yes.insert(ih);
 		}
 		else {
 			index_icase_no.insert(ih);
+		}
+	}
+	return match;
+}
+
+// ToDo: Remove for real ordered mode
+uint32_t GrammarApplicator::doesRegexpMatchLine(const Reading& reading, const Tag& tag, bool bypass_index) {
+	uint32_t match = 0;
+	uint32_t ih = hash_value(reading.tags_string_hash, tag.hash);
+	if (!bypass_index && index_matches(index_regexp_no, ih)) {
+		match = 0;
+	}
+	else if (!bypass_index && index_matches(index_regexp_yes, ih)) {
+		match = reading.tags_string_hash;
+	}
+	else {
+		UErrorCode status = U_ZERO_ERROR;
+		uregex_setText(tag.regexp, reading.tags_string.c_str(), static_cast<int32_t>(reading.tags_string.size()), &status);
+		if (status != U_ZERO_ERROR) {
+			u_fprintf(ux_stderr, "Error: uregex_setText(MatchSet) returned %s for tag %S before input line %u - cannot continue!\n", u_errorName(status), tag.tag.c_str(), numLines);
+			CG3Quit(1);
+		}
+		status = U_ZERO_ERROR;
+		if (uregex_find(tag.regexp, -1, &status)) {
+			match = reading.tags_string_hash;
+		}
+		if (status != U_ZERO_ERROR) {
+			u_fprintf(ux_stderr, "Error: uregex_find(MatchSet) returned %s for tag %S before input line %u - cannot continue!\n", u_errorName(status), tag.tag.c_str(), numLines);
+			CG3Quit(1);
+		}
+		if (match) {
+			int32_t gc = uregex_groupCount(tag.regexp, &status);
+			// ToDo: Allow regex captures from dependency target contexts without any captures in normal target contexts
+			if (gc > 0 && regexgrps.second != 0) {
+				UChar tmp[1024];
+				for (int i = 1; i <= gc; ++i) {
+					tmp[0] = 0;
+					int32_t len = uregex_group(tag.regexp, i, tmp, 1024, &status);
+					regexgrps.second->resize(std::max(static_cast<size_t>(regexgrps.first) + 1, regexgrps.second->size()));
+					UnicodeString& ucstr = (*regexgrps.second)[regexgrps.first];
+					ucstr.remove();
+					ucstr.append(tmp, len);
+					++regexgrps.first;
+				}
+			}
+			else {
+				index_regexp_yes.insert(ih);
+			}
+		}
+		else {
+			index_regexp_no.insert(ih);
 		}
 	}
 	return match;
@@ -153,9 +198,14 @@ uint32_t GrammarApplicator::doesTagMatchIcase(uint32_t test, const Tag& tag, boo
 uint32_t GrammarApplicator::doesRegexpMatchReading(const Reading& reading, const Tag& tag, bool bypass_index) {
 	uint32_t match = 0;
 
+	// ToDo: Remove for real ordered mode
+	if (tag.type & T_REGEXP_LINE) {
+		return doesRegexpMatchLine(reading, tag, bypass_index);
+	}
+
 	// Grammar::reindex() will do a one-time pass to mark any potential matching tag as T_TEXTUAL
-	foreach (mter, reading.tags_textual) {
-		match = doesTagMatchRegexp(*mter, tag, bypass_index);
+	for (auto mter : reading.tags_textual) {
+		match = doesTagMatchRegexp(mter, tag, bypass_index);
 		if (match) {
 			break;
 		}
@@ -167,7 +217,7 @@ uint32_t GrammarApplicator::doesRegexpMatchReading(const Reading& reading, const
 /**
  * Tests whether a given reading matches a given tag.
  *
- * In the http://beta.visl.sdu.dk/cg3_performance.html test data, this function is executed 1058428 times,
+ * In the https://visl.sdu.dk/cg3_performance.html test data, this function is executed 1058428 times,
  * of which 827259 are treated as raw tags.
  *
  * @param[in] reading The reading to test
@@ -199,15 +249,48 @@ uint32_t GrammarApplicator::doesTagMatchReading(const Reading& reading, const Ta
 		match = doesSetMatchReading(reading, sh, bypass_index, unif_mode);
 	}
 	else if (tag.type & T_VARSTRING) {
-		const Tag *nt = generateVarstringTag(&tag);
+		const Tag* nt = generateVarstringTag(&tag);
 		match = doesTagMatchReading(reading, *nt, unif_mode, bypass_index);
+	}
+	else if (tag.type & T_META) {
+		if (tag.regexp && !reading.parent->text.empty()) {
+			UErrorCode status = U_ZERO_ERROR;
+			uregex_setText(tag.regexp, reading.parent->text.c_str(), static_cast<int32_t>(reading.parent->text.size()), &status);
+			if (status != U_ZERO_ERROR) {
+				u_fprintf(ux_stderr, "Error: uregex_setText(MatchSet) returned %s for tag %S before input line %u - cannot continue!\n", u_errorName(status), tag.tag.c_str(), numLines);
+				CG3Quit(1);
+			}
+			status = U_ZERO_ERROR;
+			if (uregex_find(tag.regexp, -1, &status)) {
+				match = tag.hash;
+			}
+			if (status != U_ZERO_ERROR) {
+				u_fprintf(ux_stderr, "Error: uregex_find(MatchSet) returned %s for tag %S before input line %u - cannot continue!\n", u_errorName(status), tag.tag.c_str(), numLines);
+				CG3Quit(1);
+			}
+			if (match) {
+				int32_t gc = uregex_groupCount(tag.regexp, &status);
+				if (gc > 0 && regexgrps.second != 0) {
+					UChar tmp[1024];
+					for (int i = 1; i <= gc; ++i) {
+						tmp[0] = 0;
+						int32_t len = uregex_group(tag.regexp, i, tmp, 1024, &status);
+						regexgrps.second->resize(std::max(static_cast<size_t>(regexgrps.first) + 1, regexgrps.second->size()));
+						UnicodeString& ucstr = (*regexgrps.second)[regexgrps.first];
+						ucstr.remove();
+						ucstr.append(tmp, len);
+						++regexgrps.first;
+					}
+				}
+			}
+		}
 	}
 	else if (tag.regexp) {
 		match = doesRegexpMatchReading(reading, tag, bypass_index);
 	}
 	else if (tag.type & T_CASE_INSENSITIVE) {
-		foreach (mter, reading.tags_textual) {
-			match = doesTagMatchIcase(*mter, tag, bypass_index);
+		for (auto mter : reading.tags_textual) {
+			match = doesTagMatchIcase(mter, tag, bypass_index);
 			if (match) {
 				break;
 			}
@@ -241,18 +324,18 @@ uint32_t GrammarApplicator::doesTagMatchReading(const Reading& reading, const Ta
 			}
 		}
 		else {
-			foreach (mter, reading.tags_textual) {
-				const Tag& itag = *(single_tags.find(*mter)->second);
+			for (auto mter : reading.tags_textual) {
+				const Tag& itag = *(single_tags.find(mter)->second);
 				if (!(itag.type & (T_BASEFORM | T_WORDFORM))) {
 					match = itag.hash;
 					if (unif_mode) {
 						if (unif_last_textual) {
-							if (unif_last_textual != *mter) {
+							if (unif_last_textual != mter) {
 								match = 0;
 							}
 						}
 						else {
-							unif_last_textual = *mter;
+							unif_last_textual = mter;
 						}
 					}
 				}
@@ -263,13 +346,13 @@ uint32_t GrammarApplicator::doesTagMatchReading(const Reading& reading, const Ta
 		}
 	}
 	else if (tag.type & T_NUMERICAL) {
-		boost_foreach (const Reading::tags_numerical_t::value_type& mter, reading.tags_numerical) {
+		for (auto mter : reading.tags_numerical) {
 			const Tag& itag = *(mter.second);
-			int32_t compval = tag.comparison_val;
-			if (compval == INT_MIN) {
+			double compval = tag.comparison_val;
+			if (compval <= NUMERIC_MIN) {
 				compval = reading.parent->getMin(tag.comparison_hash);
 			}
-			else if (compval == INT_MAX) {
+			else if (compval >= NUMERIC_MAX) {
 				compval = reading.parent->getMax(tag.comparison_hash);
 			}
 			if (tag.comparison_hash == itag.comparison_hash) {
@@ -442,7 +525,7 @@ uint32_t GrammarApplicator::doesTagMatchReading(const Reading& reading, const Ta
 }
 
 bool GrammarApplicator::doesSetMatchReading_trie(const Reading& reading, const Set& theset, const trie_t& trie, bool unif_mode) {
-	boost_foreach (const trie_t::value_type& kv, trie) {
+	for (auto& kv : trie) {
 		bool match = (doesTagMatchReading(reading, *kv.first, unif_mode) != 0);
 		if (match) {
 			if (kv.first->type & T_FAILFAST) {
@@ -450,7 +533,7 @@ bool GrammarApplicator::doesSetMatchReading_trie(const Reading& reading, const S
 			}
 			if (kv.second.terminal) {
 				if (unif_mode) {
-					BOOST_AUTO(it, unif_tags->find(theset.number));
+					auto it = unif_tags->find(theset.number);
 					if (it != unif_tags->end() && it->second != &kv) {
 						continue;
 					}
@@ -469,7 +552,7 @@ bool GrammarApplicator::doesSetMatchReading_trie(const Reading& reading, const S
 /**
  * Tests whether a given reading matches a given LIST set.
  *
- * In the http://beta.visl.sdu.dk/cg3_performance.html test data, this function is executed 1073969 times.
+ * In the https://visl.sdu.dk/cg3_performance.html test data, this function is executed 1073969 times.
  *
  * @param[in] reading The reading to test
  * @param[in] set The hash of the set to test against
@@ -479,7 +562,7 @@ bool GrammarApplicator::doesSetMatchReading_tags(const Reading& reading, const S
 	bool retval = false;
 
 	if (!theset.ff_tags.empty()) {
-		boost_foreach (const Tag *tag, theset.ff_tags) {
+		for (auto tag : theset.ff_tags) {
 			if (doesTagMatchReading(reading, *tag, unif_mode)) {
 				return false;
 			}
@@ -495,7 +578,7 @@ bool GrammarApplicator::doesSetMatchReading_tags(const Reading& reading, const S
 			if (*oiter == iiter->first->hash) {
 				if (iiter->second.terminal) {
 					if (unif_mode) {
-						BOOST_AUTO(it, unif_tags->find(theset.number));
+						auto it = unif_tags->find(theset.number);
 						if (it != unif_tags->end() && it->second != &*iiter) {
 							++iiter;
 							continue;
@@ -530,7 +613,7 @@ bool GrammarApplicator::doesSetMatchReading_tags(const Reading& reading, const S
 /**
  * Tests whether a given reading matches a given LIST or SET set.
  *
- * In the http://beta.visl.sdu.dk/cg3_performance.html test data, this function is executed 5746792 times,
+ * In the https://visl.sdu.dk/cg3_performance.html test data, this function is executed 5746792 times,
  * of which only 1700292 make it past the first index check.
  *
  * @param[in] reading The reading to test
@@ -588,10 +671,10 @@ bool GrammarApplicator::doesSetMatchReading(const Reading& reading, const uint32
 		}
 		// Subsequent times, test whether any of the previously stored sets match the reading
 		else {
-			BOOST_AUTO(sets, ss_u32sv.get());
-			foreach (usi, *unif_sets) {
-				if (doesSetMatchReading(reading, *usi, bypass_index, unif_mode)) {
-					sets->insert(*usi);
+			auto sets = ss_u32sv.get();
+			for (auto usi : *unif_sets) {
+				if (doesSetMatchReading(reading, usi, bypass_index, unif_mode)) {
+					sets->insert(usi);
 				}
 			}
 			retval = !sets->empty();
@@ -652,9 +735,9 @@ bool GrammarApplicator::doesSetMatchReading(const Reading& reading, const uint32
 		}
 		// Propagate unified tag to other sets of this set, if applicable
 		if (unif_mode || (theset.type & ST_TAG_UNIFY)) {
-			const void *tag = 0;
+			const void* tag = 0;
 			for (size_t i = 0; i < size; ++i) {
-				BOOST_AUTO(it, unif_tags->find(theset.sets[i]));
+				auto it = unif_tags->find(theset.sets[i]);
 				if (it != unif_tags->end()) {
 					tag = it->second;
 					break;
@@ -701,18 +784,22 @@ inline bool _check_options(std::vector<Reading*>& rv, uint32_t options, size_t n
 	return !rv.empty();
 }
 
-inline bool GrammarApplicator::doesSetMatchCohort_testLinked(Cohort& cohort, const Set& theset, dSMC_Context *context) {
+inline bool GrammarApplicator::doesSetMatchCohort_testLinked(Cohort& cohort, const Set& theset, dSMC_Context* context) {
 	bool retval = true;
-	const ContextualTest *linked = 0;
-	inc_dec<size_t> ic;
+	bool reset = false;
+	const ContextualTest* linked = 0;
+	Cohort* min = 0;
+	Cohort* max = 0;
 
 	if (context->test && context->test->linked) {
 		linked = context->test->linked;
 	}
-	else if (!tmpl_cntxs.empty() && tmpl_cntx_pos < tmpl_cntxs.size()) {
-		// The outermost LINK was added first. Links are processed as a stack.
-		ic.inc(tmpl_cntx_pos);
-		linked = tmpl_cntxs[tmpl_cntxs.size() - tmpl_cntx_pos].test;
+	else if (!tmpl_cntx.linked.empty()) {
+		min = tmpl_cntx.min;
+		max = tmpl_cntx.max;
+		linked = tmpl_cntx.linked.back();
+		tmpl_cntx.linked.pop_back();
+		reset = true;
 	}
 	if (linked) {
 		if (!context->did_test) {
@@ -728,13 +815,20 @@ inline bool GrammarApplicator::doesSetMatchCohort_testLinked(Cohort& cohort, con
 		}
 		retval = context->matched_tests;
 	}
+	if (reset) {
+		tmpl_cntx.linked.push_back(linked);
+	}
+	if (!retval) {
+		tmpl_cntx.min = min;
+		tmpl_cntx.max = max;
+	}
 	return retval;
 }
 
-inline bool GrammarApplicator::doesSetMatchCohort_helper(Cohort& cohort, Reading& reading, const Set& theset, dSMC_Context *context) {
+inline bool GrammarApplicator::doesSetMatchCohort_helper(Cohort& cohort, Reading& reading, const Set& theset, dSMC_Context* context) {
 	bool retval = false;
-	BOOST_AUTO(utags, ss_utags.get());
-	BOOST_AUTO(usets, ss_u32sv.get());
+	auto utags = ss_utags.get();
+	auto usets = ss_u32sv.get();
 	uint8_t orz = regexgrps.first;
 
 	if (context && !(current_rule->flags & FL_CAPTURE_UNIF) && (theset.type & ST_CHILD_UNIFY)) {
@@ -771,15 +865,14 @@ inline bool GrammarApplicator::doesSetMatchCohort_helper(Cohort& cohort, Reading
 	return retval;
 }
 
-
-bool GrammarApplicator::doesSetMatchCohortNormal(Cohort& cohort, const uint32_t set, dSMC_Context *context) {
+bool GrammarApplicator::doesSetMatchCohortNormal(Cohort& cohort, const uint32_t set, dSMC_Context* context) {
 	bool retval = false;
 
 	if (!(!context || (context->options & (POS_LOOK_DELETED | POS_LOOK_DELAYED | POS_NOT))) && (set >= cohort.possible_sets.size() || !cohort.possible_sets.test(set))) {
 		return retval;
 	}
 
-	const Set *theset = grammar->sets_list[set];
+	const Set* theset = grammar->sets_list[set];
 
 	if (cohort.wread) {
 		retval = doesSetMatchCohort_helper(cohort, *cohort.wread, *theset, context);
@@ -789,7 +882,7 @@ bool GrammarApplicator::doesSetMatchCohortNormal(Cohort& cohort, const uint32_t 
 		return retval;
 	}
 
-	ReadingList *lists[3] = { &cohort.readings };
+	ReadingList* lists[3] = { &cohort.readings };
 	if (context && (context->options & POS_LOOK_DELETED)) {
 		lists[1] = &cohort.deleted;
 	}
@@ -797,12 +890,11 @@ bool GrammarApplicator::doesSetMatchCohortNormal(Cohort& cohort, const uint32_t 
 		lists[2] = &cohort.delayed;
 	}
 
-	for (size_t i = 0; i < 3; ++i) {
-		if (lists[i] == 0) {
+	for (auto list : lists) {
+		if (list == 0) {
 			continue;
 		}
-		foreach (iter, *lists[i]) {
-			Reading *reading = *iter;
+		for (auto reading : *list) {
 			if (context && context->test) {
 				// ToDo: Barriers need some way to escape sub-readings
 				reading = get_sub_reading(reading, context->test->offset_sub);
@@ -834,16 +926,16 @@ bool GrammarApplicator::doesSetMatchCohortNormal(Cohort& cohort, const uint32_t 
 	return retval;
 }
 
-bool GrammarApplicator::doesSetMatchCohortCareful(Cohort& cohort, const uint32_t set, dSMC_Context *context) {
+bool GrammarApplicator::doesSetMatchCohortCareful(Cohort& cohort, const uint32_t set, dSMC_Context* context) {
 	bool retval = false;
 
 	if (!(!context || (context->options & (POS_LOOK_DELETED | POS_LOOK_DELAYED | POS_NOT))) && (set >= cohort.possible_sets.size() || !cohort.possible_sets.test(set))) {
 		return retval;
 	}
 
-	const Set *theset = grammar->sets_list[set];
+	const Set* theset = grammar->sets_list[set];
 
-	ReadingList *lists[3] = { &cohort.readings };
+	ReadingList* lists[3] = { &cohort.readings };
 	if (context && (context->options & POS_LOOK_DELETED)) {
 		lists[1] = &cohort.deleted;
 	}
@@ -851,12 +943,11 @@ bool GrammarApplicator::doesSetMatchCohortCareful(Cohort& cohort, const uint32_t
 		lists[2] = &cohort.delayed;
 	}
 
-	for (size_t i = 0; i < 3; ++i) {
-		if (lists[i] == 0) {
+	for (auto list : lists) {
+		if (list == 0) {
 			continue;
 		}
-		foreach (iter, *lists[i]) {
-			Reading *reading = *iter;
+		for (auto reading : *list) {
 			if (context && context->test) {
 				// ToDo: Barriers need some way to escape sub-readings
 				reading = get_sub_reading(reading, context->test->offset_sub);

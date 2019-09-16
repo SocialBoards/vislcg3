@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2007-2017, GrammarSoft ApS
+* Copyright (C) 2007-2018, GrammarSoft ApS
 * Developed by Tino Didriksen <mail@tinodidriksen.com>
 * Design by Eckhard Bick <eckhard.bick@mail.dk>, Tino Didriksen <mail@tinodidriksen.com>
 *
@@ -30,6 +30,16 @@
 	#pragma warning (disable: 4456)
 	// warning C4458: declaration hides class member
 	#pragma warning (disable: 4458)
+	// warning C4312: 'operation' : conversion from 'type1' to 'type2' of greater size 
+	#pragma warning (disable: 4312)
+
+	#if !defined(cg3_EXPORTS)
+		#define CG3_IMPORTS __declspec(dllimport)
+	#else
+		#define CG3_IMPORTS
+	#endif
+#else
+	#define CG3_IMPORTS
 #endif
 
 #include <exception>
@@ -49,6 +59,8 @@
 #include <string>
 #include <set>
 #include <map>
+#include <unordered_map>
+#include <unordered_set>
 #include <stack>
 #include <limits>
 #include <ctime>
@@ -57,7 +69,7 @@
 #include <cassert>
 #include <ciso646>
 #include <sys/stat.h>
-#include <stdint.h> // C99 or C++0x or C++ TR1 will have this header. ToDo: Change to <cstdint> when C++0x broader support gets under way.
+#include <cstdint>
 #include <cycle.h>
 
 // cycle.h doesn't know all platforms (such as ARM), so fall back on clock()
@@ -73,26 +85,17 @@
 	#define HAVE_TICK_COUNTER
 #endif
 
-#include <boost/unordered_set.hpp>
-#include <boost/unordered_map.hpp>
 #include <boost/container/flat_set.hpp>
 #include <boost/container/flat_map.hpp>
 #include <boost/dynamic_bitset.hpp>
-#include <boost/scoped_ptr.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/typeof/typeof.hpp>
-#include <boost/foreach.hpp>
-#define boost_foreach BOOST_FOREACH
-#define stdext boost
-#define hash_map unordered_map
 
 #define foreach(iter, container) \
 	if (!(container).empty())    \
-		for (BOOST_AUTO(iter, (container).begin()), iter##_end = (container).end(); iter != iter##_end; ++iter)
+		for (auto iter = (container).begin(), iter##_end = (container).end(); iter != iter##_end; ++iter)
 
 #define reverse_foreach(iter, container) \
 	if (!(container).empty())            \
-		for (BOOST_AUTO(iter, (container).rbegin()), iter##_end = (container).rend(); iter != iter##_end; ++iter)
+		for (auto iter = (container).rbegin(), iter##_end = (container).rend(); iter != iter##_end; ++iter)
 
 #ifdef _WIN32
 	#include <winsock.h> // for hton() and family.
@@ -115,12 +118,29 @@
 #include <unicode/ustring.h>
 #include <unicode/uregex.h>
 #include <unicode/ubrk.h>
+using namespace icu;
 
 namespace CG3 {
 typedef std::basic_string<UChar> UString;
 typedef std::vector<UString> UStringVector;
 typedef std::vector<uint32_t> uint32Vector;
 namespace bc = ::boost::container;
+
+inline UString operator "" _us(const char* str, std::size_t len) {
+	UString us(len, 0);
+	for (size_t i = 0; i < len; ++i) {
+		us[i] = str[i];
+	}
+	return us;
+}
+
+inline UString operator "" _us(const char16_t* str, std::size_t len) {
+	UString us(len, 0);
+	for (size_t i = 0; i < len; ++i) {
+		us[i] = str[i];
+	}
+	return us;
+}
 }
 
 #include "inlines.hpp"

@@ -1,0 +1,10 @@
+Initialization took 9.3e-05 seconds.
+Reindexing grammar...
+Parsing grammar took 0.0001 seconds.
+Grammar has 1 sections, 0 templates, 2 rules, 4 sets, 14 tags.
+Writing binary grammar took 7e-05 seconds.
+Cleanup took 5e-06 seconds.
+Warning: "<text that looks like a cohort on line 8 looked like a cohort but wasn't - treated as text.
+Warning:  "text that looks like a reading on line 13 looked like a reading but wasn't - treated as text.
+Warning: "<text that looks like a cohort on line 8 looked like a cohort but wasn't - treated as text.
+Warning:  "text that looks like a reading on line 13 looked like a reading but wasn't - treated as text.

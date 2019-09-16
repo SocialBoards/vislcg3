@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2007-2017, GrammarSoft ApS
+* Copyright (C) 2007-2018, GrammarSoft ApS
 * Developed by Tino Didriksen <mail@tinodidriksen.com>
 * Design by Eckhard Bick <eckhard.bick@mail.dk>, Tino Didriksen <mail@tinodidriksen.com>
 *
@@ -26,10 +26,10 @@
 namespace CG3 {
 
 std::vector<SingleWindow*> pool_swindows;
-pool_cleaner<std::vector<SingleWindow*> > cleaner_swindows(pool_swindows);
+pool_cleaner<std::vector<SingleWindow*>> cleaner_swindows(pool_swindows);
 
-SingleWindow *alloc_swindow(Window *p) {
-	SingleWindow *s = pool_get(pool_swindows);
+SingleWindow* alloc_swindow(Window* p) {
+	SingleWindow* s = pool_get(pool_swindows);
 	if (s == 0) {
 		s = new SingleWindow(p);
 	}
@@ -39,14 +39,14 @@ SingleWindow *alloc_swindow(Window *p) {
 	return s;
 }
 
-void free_swindow(SingleWindow *s) {
+void free_swindow(SingleWindow* s) {
 	if (s == 0) {
 		return;
 	}
 	pool_put(pool_swindows, s);
 }
 
-SingleWindow::SingleWindow(Window *p)
+SingleWindow::SingleWindow(Window* p)
   : number(0)
   , has_enclosures(false)
   , next(0)
@@ -74,8 +74,8 @@ SingleWindow::~SingleWindow() {
 		}
 	}
 
-	foreach (iter, cohorts) {
-		delete *iter;
+	for (auto iter : cohorts) {
+		delete iter;
 	}
 	if (next && previous) {
 		next->previous = previous;
@@ -103,8 +103,8 @@ void SingleWindow::clear() {
 		}
 	}
 
-	foreach (iter, cohorts) {
-		free_cohort(*iter);
+	for (auto iter : cohorts) {
+		free_cohort(iter);
 	}
 	if (next && previous) {
 		next->previous = previous;
@@ -128,7 +128,7 @@ void SingleWindow::clear() {
 	cohorts.clear();
 	valid_rules.clear();
 	hit_external.clear();
-	boost_foreach (CohortSet& cs, rule_to_cohorts) {
+	for (auto& cs : rule_to_cohorts) {
 		cs.clear();
 	}
 	variables_set.clear();
@@ -137,7 +137,7 @@ void SingleWindow::clear() {
 	bag_of_tags.clear();
 }
 
-void SingleWindow::appendCohort(Cohort *cohort) {
+void SingleWindow::appendCohort(Cohort* cohort) {
 	cohort->local_number = (uint32_t)cohorts.size();
 	cohort->parent = this;
 

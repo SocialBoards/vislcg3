@@ -1,0 +1,1 @@
+/usr/bin/cc  -Wall -Wextra -Wno-missing-field-initializers -Wno-deprecated -Wno-unused-parameter -fPIC -Wno-unused-result -flto -std=c11 -O3 -DNDEBUG -O3  -rdynamic CMakeFiles/test_libcg3.dir/test_libcg3.c.o  -o test_libcg3 -Wl,-rpath,/home/emil/Programmer/vislcg3/src libcg3.so.1 -lpthread -licuuc -licuio -licui18n 

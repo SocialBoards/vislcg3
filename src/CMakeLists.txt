@@ -8,13 +8,13 @@ endif()
 find_path(Boost_LOCAL NAMES boost/config.hpp PATHS "${CMAKE_CURRENT_SOURCE_DIR}/../include" NO_DEFAULT_PATH)
 if(Boost_LOCAL)
 	set(BOOST_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../include")
-	find_package(Boost 1.48.0)
+	find_package(Boost 1.53.0)
 endif()
 if(NOT Boost_FOUND)
 	unset(BOOST_ROOT)
 	message(STATUS "Did not find Boost locally; trying globally...")
 	message(STATUS "If this doesn't work, run ./get-boost.sh and try again.")
-	find_package(Boost 1.48.0 REQUIRED)
+	find_package(Boost 1.53.0 REQUIRED)
 endif()
 include_directories(${Boost_INCLUDE_DIRS})
 link_directories(${Boost_LIBRARY_DIRS})
@@ -22,8 +22,8 @@ link_directories(${Boost_LIBRARY_DIRS})
 # ICU
 find_package(ICU REQUIRED)
 if(ICU_FOUND)
-	if(ICU_VERSION VERSION_LESS "4.2")
-		message(FATAL_ERROR "ICU is too old - ${ICU_VERSION} was found, but CG-3 requires 4.2 or newer")
+	if(ICU_VERSION VERSION_LESS "50.0")
+		message(FATAL_ERROR "ICU is too old - ${ICU_VERSION} was found, but CG-3 requires 50.0 or newer")
 	endif()
 	include_directories(${ICU_INCLUDE_DIRS})
 	message(STATUS "Found ICU version ${ICU_VERSION}")
@@ -80,12 +80,12 @@ set(LIBCG3_HEADERS
 	flat_unordered_set.hpp
 	inlines.hpp
 	interval_vector.hpp
-	istream.hpp
 	parser_helpers.hpp
 	process.hpp
 	scoped_stack.hpp
 	sorted_vector.hpp
 	stdafx.hpp
+	streambuf.hpp
 	uextras.hpp
 	version.hpp
 	)
@@ -116,38 +116,21 @@ set(LIBCG3_SOURCES
 	TextualParser.cpp
 	Window.cpp
 	uextras.cpp
-	${POPEN_PLUS_C}
+	${POPEN_PLUS_CPP}
 	${LIBCG3_HEADERS}
 	)
 if(MSVC)
 	set(LIBCG3_SOURCES
-		"${CMAKE_SOURCE_DIR}/include/win32/getopt.c"
+		"${CMAKE_SOURCE_DIR}/include/win32/getopt.cpp"
 		"${CMAKE_SOURCE_DIR}/include/win32/getopt.h"
 		${LIBCG3_SOURCES}
 		)
 endif()
 
-add_library(libcg3-objs OBJECT ${LIBCG3_SOURCES})
-
-if(MSVC OR INSTALL_STATIC)
-	add_library(libcg3 STATIC libcg3.cpp $<TARGET_OBJECTS:libcg3-objs>)
-	set_target_properties(libcg3 PROPERTIES OUTPUT_NAME "cg3")
-	set_target_properties(libcg3 PROPERTIES PREFIX "lib")
-	if(MSVC AND NOT CMAKE_BUILD_TYPE STREQUAL Debug)
-		set_target_properties(libcg3 PROPERTIES STATIC_LIBRARY_FLAGS "/LTCG")
-	endif()
-	cg3_link(libcg3)
-	set(LINKLIB libcg3)
-endif()
-
-if(NOT MSVC)
-	add_library(libcg3-shared SHARED libcg3.cpp $<TARGET_OBJECTS:libcg3-objs>)
-	set_target_properties(libcg3-shared PROPERTIES SOVERSION ${_cg3_VERSION_MAJOR})
-	set_target_properties(libcg3-shared PROPERTIES OUTPUT_NAME "cg3")
-	set_target_properties(libcg3-shared PROPERTIES PREFIX "lib")
-	cg3_link(libcg3-shared)
-	set(LINKLIB libcg3-shared)
-endif()
+add_library(cg3 libcg3.cpp ${LIBCG3_SOURCES})
+set_target_properties(cg3 PROPERTIES SOVERSION ${_cg3_VERSION_MAJOR})
+cg3_link(cg3)
+set(LINKLIB cg3)
 
 add_executable(cg-comp cg_comp.cpp)
 cg3_link(cg-comp)
@@ -186,7 +169,7 @@ add_executable(cg-conv
 cg3_link(cg-conv)
 target_link_libraries(cg-conv ${LINKLIB})
 
-add_executable(cg-mwesplit cg-mwesplit.cpp MweSplitApplicator.cpp MweSplitApplicator.hpp)
+add_executable(cg-mwesplit cg-mwesplit.cpp)
 cg3_link(cg-mwesplit)
 target_link_libraries(cg-mwesplit ${LINKLIB})
 
@@ -215,12 +198,6 @@ endif()
 
 add_test(t_libcg3 test_libcg3 "${CMAKE_CURRENT_SOURCE_DIR}/../test/T_Select/grammar.cg3")
 
-if(INSTALL_STATIC)
-	install(TARGETS libcg3 ARCHIVE DESTINATION "${CG_LIBDIR}/${CMAKE_LIBRARY_ARCHITECTURE}")
-endif()
-
-if(NOT MSVC)
-	install(TARGETS libcg3-shared ARCHIVE DESTINATION "${CG_LIBDIR}/${CMAKE_LIBRARY_ARCHITECTURE}" LIBRARY DESTINATION "${CG_LIBDIR}/${CMAKE_LIBRARY_ARCHITECTURE}" RUNTIME DESTINATION bin)
-	install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/cg3.h" DESTINATION include)
-endif()
+install(TARGETS cg3 ARCHIVE DESTINATION "${CG_LIBDIR}/${CMAKE_LIBRARY_ARCHITECTURE}" LIBRARY DESTINATION "${CG_LIBDIR}/${CMAKE_LIBRARY_ARCHITECTURE}" RUNTIME DESTINATION bin)
+install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/cg3.h" DESTINATION include)
 install(TARGETS cg-comp cg-proc cg-relabel cg-mwesplit cg-conv vislcg3 RUNTIME DESTINATION bin)

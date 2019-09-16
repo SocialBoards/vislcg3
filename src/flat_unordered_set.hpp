@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2007-2017, GrammarSoft ApS
+* Copyright (C) 2007-2018, GrammarSoft ApS
 * Developed by Tino Didriksen <mail@tinodidriksen.com>
 * Design by Eckhard Bick <eckhard.bick@mail.dk>, Tino Didriksen <mail@tinodidriksen.com>
 *
@@ -27,7 +27,7 @@
 #include <vector>
 #include <algorithm>
 #include <functional>
-#include <stdint.h> // C99 or C++0x or C++ TR1 will have this header. ToDo: Change to <cstdint> when C++0x broader support gets under way.
+#include <cstdint>
 
 namespace CG3 {
 
@@ -37,7 +37,7 @@ public:
 	class const_iterator : public std::iterator<std::bidirectional_iterator_tag, T> {
 	private:
 		friend class flat_unordered_set;
-		const flat_unordered_set *fus;
+		const flat_unordered_set* fus;
 		size_t i;
 
 	public:
@@ -233,7 +233,7 @@ public:
 			return;
 		}
 
-		static container vals;
+		static thread_local container vals;
 		vals.resize(0);
 		vals.reserve(size_);
 		for (size_type i = 0, ie = capacity(); i < ie; ++i) {

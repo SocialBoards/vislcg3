@@ -1,0 +1,2 @@
+Warning: Hard limit of 6 cohorts reached at line 22 - forcing break.
+Warning: Hard limit of 6 cohorts reached at line 34 - forcing break.

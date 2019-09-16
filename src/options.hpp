@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2007-2017, GrammarSoft ApS
+* Copyright (C) 2007-2018, GrammarSoft ApS
 * Developed by Tino Didriksen <mail@tinodidriksen.com>
 * Design by Eckhard Bick <eckhard.bick@mail.dk>, Tino Didriksen <mail@tinodidriksen.com>
 *
@@ -23,7 +23,7 @@
 #ifndef c6d28b7452ec699b_OPTIONS_H
 #define c6d28b7452ec699b_OPTIONS_H
 
-#include <uoptions.h>
+#include <uoptions.hpp>
 
 namespace Options {
 enum OPTIONS {
@@ -60,6 +60,7 @@ enum OPTIONS {
 	TRACE_NAME_ONLY,
 	TRACE_NO_REMOVED,
 	TRACE_ENCL,
+	PIPE_DELETED,
 	DRYRUN,
 	SINGLERUN,
 	MAXRUNS,
@@ -112,10 +113,10 @@ UOption options[] = {
 	UOPTION_DEF_D("stdout",              'O', UOPT_REQUIRES_ARG, "file to print output to instead of stdout"),
 	UOPTION_DEF_D("stderr",              'E', UOPT_REQUIRES_ARG, "file to print errors to instead of stderr"),
 
-	UOPTION_DEF_D("codepage-all",        'C', UOPT_REQUIRES_ARG, "codepage to use for grammar, input, and output streams; defaults to UTF-8"),
-	UOPTION_DEF_D("codepage-grammar",      0, UOPT_REQUIRES_ARG, "codepage to use for grammar; overrides --codepage-all"),
-	UOPTION_DEF_D("codepage-input",        0, UOPT_REQUIRES_ARG, "codepage to use for input; overrides --codepage-all"),
-	UOPTION_DEF_D("codepage-output",       0, UOPT_REQUIRES_ARG, "codepage to use for output and errors; overrides --codepage-all"),
+	UOPTION_DEF_D("codepage-all",        'C', UOPT_REQUIRES_ARG, nullptr),
+	UOPTION_DEF_D("codepage-grammar",      0, UOPT_REQUIRES_ARG, nullptr),
+	UOPTION_DEF_D("codepage-input",        0, UOPT_REQUIRES_ARG, nullptr),
+	UOPTION_DEF_D("codepage-output",       0, UOPT_REQUIRES_ARG, nullptr),
 
 	UOPTION_DEF_D("no-mappings",           0, UOPT_NO_ARG,       "disables all MAP, ADD, and REPLACE rules"),
 	UOPTION_DEF_D("no-corrections",        0, UOPT_NO_ARG,       "disables all SUBSTITUTE and APPEND rules"),
@@ -127,6 +128,8 @@ UOption options[] = {
 	UOPTION_DEF_D("trace-name-only",       0, UOPT_NO_ARG,       "if a rule is named, omit the line number; implies --trace"),
 	UOPTION_DEF_D("trace-no-removed",      0, UOPT_NO_ARG,       "does not print removed readings; implies --trace"),
 	UOPTION_DEF_D("trace-encl",            0, UOPT_NO_ARG,       "traces which enclosure pass is currently happening; implies --trace"),
+
+	UOPTION_DEF_D("deleted",               0, UOPT_NO_ARG,       "read deleted readings as such, instead of as text"),
 
 	UOPTION_DEF_D("dry-run",               0, UOPT_NO_ARG,       "make no actual changes to the input"),
 	UOPTION_DEF_D("single-run",            0, UOPT_NO_ARG,       "runs each section only once; same as --max-runs 1"),

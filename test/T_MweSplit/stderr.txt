@@ -1,0 +1,4 @@
+WARNING: Line 40: Some but not all main-readings of "<dalle go>" had wordform-tags (not completely mwe-disambiguated?), not splitting.
+WARNING: Line 85: Ambiguous wordform-tags for same cohort, '"<iđida>"' vs '"<sotnabeaivvi iđida>"', not splitting.
+WARNING: Line 40: Some but not all main-readings of "<dalle go>" had wordform-tags (not completely mwe-disambiguated?), not splitting.
+WARNING: Line 85: Ambiguous wordform-tags for same cohort, '"<iđida>"' vs '"<sotnabeaivvi iđida>"', not splitting.

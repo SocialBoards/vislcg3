@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2007-2017, GrammarSoft ApS
+* Copyright (C) 2007-2018, GrammarSoft ApS
 * Developed by Tino Didriksen <mail@tinodidriksen.com>
 * Design by Eckhard Bick <eckhard.bick@mail.dk>, Tino Didriksen <mail@tinodidriksen.com>
 *
@@ -26,7 +26,7 @@
 #include <vector>
 #include <algorithm>
 #include <functional>
-#include <stdint.h> // C99 or C++0x or C++ TR1 will have this header. ToDo: Change to <cstdint> when C++0x broader support gets under way.
+#include <cstdint>
 
 namespace CG3 {
 namespace detail {
@@ -35,8 +35,9 @@ namespace detail {
 		if (first != last) {
 			ForwardIt next = first;
 			while (++next != last) {
-				if (comp(*next, *first))
+				if (comp(*next, *first)) {
 					return false;
+				}
 				first = next;
 			}
 		}
@@ -44,7 +45,7 @@ namespace detail {
 	}
 }
 
-template<typename T, typename Comp = std::less<T> >
+template<typename T, typename Comp = std::less<T>>
 class sorted_vector {
 public:
 	typedef typename std::vector<T> container;
@@ -97,7 +98,7 @@ public:
 			return;
 		}
 
-		static container merged;
+		static thread_local container merged;
 		merged.resize(0);
 		merged.reserve(elements.size() + d);
 
@@ -105,32 +106,32 @@ public:
 			std::merge(elements.begin(), elements.end(), b, e, std::back_inserter(merged), comp);
 		}
 		else {
-			static container sorted;
+			static thread_local container sorted;
 			sorted.assign(b, e);
 			std::sort(sorted.begin(), sorted.end(), comp);
 			std::merge(elements.begin(), elements.end(), sorted.begin(), sorted.end(), std::back_inserter(merged), comp);
 		}
 
 		merged.swap(elements);
-		iterator it = std::unique(elements.begin(), elements.end());
+		auto it = std::unique(elements.begin(), elements.end());
 		elements.erase(it, elements.end());
 	}
 
-	bool push_back(T t) {
-		return insert(t);
+	void push_back(T t) {
+		insert(t);
 	}
 
 	bool erase(T t) {
 		if (elements.empty()) {
 			return false;
 		}
-		else if (comp(elements.back(), t)) {
+		if (comp(elements.back(), t)) {
 			return false;
 		}
-		else if (comp(t, elements.front())) {
+		if (comp(t, elements.front())) {
 			return false;
 		}
-		iterator it = lower_bound(t);
+		auto it = lower_bound(t);
 		if (it != elements.end() && !comp(*it, t) && !comp(t, *it)) {
 			elements.erase(it);
 			return true;
@@ -143,17 +144,24 @@ public:
 		return elements.erase(elements.begin() + o);
 	}
 
+	template<typename It>
+	void erase(It b, It e) {
+		for (; b != e; ++b) {
+			erase(*b);
+		}
+	}
+
 	const_iterator find(T t) const {
 		if (elements.empty()) {
 			return elements.end();
 		}
-		else if (comp(elements.back(), t)) {
+		if (comp(elements.back(), t)) {
 			return elements.end();
 		}
-		else if (comp(t, elements.front())) {
+		if (comp(t, elements.front())) {
 			return elements.end();
 		}
-		const_iterator it = lower_bound(t);
+		auto it = lower_bound(t);
 		if (it != elements.end() && (comp(*it, t) || comp(t, *it))) {
 			return elements.end();
 		}
@@ -240,6 +248,10 @@ public:
 
 	void sort() {
 		std::sort(elements.begin(), elements.end(), Comp());
+	}
+
+	void pop_back() {
+		elements.pop_back();
 	}
 
 	container& get() {
