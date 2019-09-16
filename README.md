@@ -1,10 +1,12 @@
 This is a fork of vislcg3 that adds some support for .NET P/Invoking. The following methods were added to src/libcg3.cpp & cg3.h:
 
 ```// Runs a grammar on a UTF-8 string instead of stdin
-char* cg3_run_grammar_on_text_str(cg3_applicator* applicator_, const char* is_);```
+char* cg3_run_grammar_on_text_str(cg3_applicator* applicator_, const char* is_);
+```
 
 ```// Frees the unmanaged string returned by cg3_run_grammar_on_text_str
-void cg3_run_grammar_on_text_str_free(char *str);```
+void cg3_run_grammar_on_text_str_free(char *str);
+```
 
 #Installation
 
@@ -13,7 +15,8 @@ void cg3_run_grammar_on_text_str_free(char *str);```
 make -j3
 ./test/runall.pl
 sudo make install
-sudo ldconfig```
+sudo ldconfig
+```
 
 See also http://beta.visl.sdu.dk/cg3/chunked/installation.html.
 *DO NOT* add support for TMalloc. I.e. *DO NOT* run sudo apt-get install libgoogle-perftools-dev
@@ -50,4 +53,5 @@ See also http://beta.visl.sdu.dk/cg3/chunked/installation.html.
             }
         }
     }
-}```
+}
+```
