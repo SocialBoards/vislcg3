@@ -10,7 +10,7 @@ char* cg3_run_grammar_on_text_str(cg3_applicator* applicator_, const char* is_);
 void cg3_run_grammar_on_text_str_free(char *str);
 ```
 
-#Installation
+# Installation
 
 ```
 sudo apt-get install g++ libicu-dev subversion cmake libboost-dev build-essential
@@ -24,7 +24,7 @@ sudo ldconfig
 See also http://beta.visl.sdu.dk/cg3/chunked/installation.html.
 *DO NOT* add support for TMalloc. I.e. *DO NOT* run sudo apt-get install libgoogle-perftools-dev
 
-#P/Invoking
+# P/Invoking
 
 ```
 class Example
