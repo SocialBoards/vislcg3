@@ -1,16 +1,19 @@
 This is a fork of vislcg3 that adds some support for .NET P/Invoking. The following methods were added to src/libcg3.cpp & cg3.h:
 
-```// Runs a grammar on a UTF-8 string instead of stdin
+```
+// Runs a grammar on a UTF-8 string instead of stdin
 char* cg3_run_grammar_on_text_str(cg3_applicator* applicator_, const char* is_);
 ```
 
-```// Frees the unmanaged string returned by cg3_run_grammar_on_text_str
+```
+// Frees the unmanaged string returned by cg3_run_grammar_on_text_str
 void cg3_run_grammar_on_text_str_free(char *str);
 ```
 
 #Installation
 
-```sudo apt-get install g++ libicu-dev subversion cmake libboost-dev build-essential
+```
+sudo apt-get install g++ libicu-dev subversion cmake libboost-dev build-essential
  ./cmake.sh
 make -j3
 ./test/runall.pl
@@ -23,7 +26,8 @@ See also http://beta.visl.sdu.dk/cg3/chunked/installation.html.
 
 #P/Invoking
 
-```class Example
+```
+class Example
 {
     static IntPtr _grammar;
 
